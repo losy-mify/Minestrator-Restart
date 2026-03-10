@@ -22,6 +22,7 @@ jobs:
           python-version: '3.10'
 
       - name: 🛡️ 启动 Gost 代理转发
+        if: ${{ secrets.GOST_PROXY != '' }}
         run: |
           wget https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-linux-amd64-2.11.5.gz
           gunzip gost-linux-amd64-2.11.5.gz
