@@ -37,17 +37,14 @@ jobs:
       - name: 🛠️ 安装系统依赖
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            google-chrome-stable \
-            xvfb \
-            x11-utils \
-            xdotool \
-            scrot
+          # 修复：ubuntu-latest 默认源没有 google-chrome-stable，改用 seleniumbase 内置安装
+          sudo apt-get install -y xvfb x11-utils xdotool scrot
 
       - name: 🐍 安装 Python 依赖
         run: |
           pip install seleniumbase
           seleniumbase install chromedriver
+          seleniumbase install chrome
 
       - name: 🚀 运行脚本
         env:
