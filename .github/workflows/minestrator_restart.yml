@@ -2,7 +2,9 @@ name: Minestrator-Restart
 
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 */2 * * *'  # 每 2 小时自动触发一次，按需调整或删除
+    
 jobs:
   start:
     runs-on: ubuntu-latest
