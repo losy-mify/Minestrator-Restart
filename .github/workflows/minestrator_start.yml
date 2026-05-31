@@ -1,9 +1,7 @@
-name: Minestrator 启动服务器
+name: Minestrator-Restart
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *'  # 每 6 小时自动触发一次，按需调整或删除
 
 jobs:
   start:
@@ -13,12 +11,12 @@ jobs:
       - name: 📥 拉取私库脚本
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/Minestrator-Start-Private
+          repository: ${{ github.repository_owner }}/Minestrator-Restart-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: private
 
       - name: 📂 复制脚本到工作目录
-        run: cp private/minestrator_start.sh minestrator_start.sh
+        run: cp private/minestrator_restart.sh minestrator_restart.sh
 
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
@@ -40,19 +38,19 @@ jobs:
           MSR_ACCOUNT: ${{ secrets.MSR_ACCOUNT }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
-        run: bash minestrator_start.sh
+        run: bash minestrator_restart.sh
 
       - name: 📤 推回私库（如有 token 更新）
         if: always()
         env:
           PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
         run: |
-          cp minestrator_start.sh private/minestrator_start.sh
+          cp minestrator_restart.sh private/minestrator_restart.sh
           cd private
           if ! git diff --quiet; then
             git config user.email "actions@github.com"
             git config user.name "GitHub Actions"
-            git add minestrator_start.sh
+            git add minestrator_restart.sh
             git commit -m "🔄 自动更新 API_KEY_B64"
             git push "https://${PRIVATE_REPO_TOKEN}@github.com/${{ github.repository_owner }}/Minestrator-Start-Private.git" HEAD
             echo "✅ 已推回私库"
