@@ -1,14 +1,15 @@
 name: Minestrator-Restart
-
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */2 * * *'  # 每 2 小时自动触发一次，按需调整或删除
-    
+    - cron: '0 */2 * * *'
+
 jobs:
   start:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      GOST_PROXY: ${{ secrets.GOST_PROXY }}
     steps:
       - name: 📥 拉取私库脚本
         uses: actions/checkout@v4
@@ -22,8 +23,6 @@ jobs:
 
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
-        env:
-          GOST_PROXY: ${{ secrets.GOST_PROXY }}
         run: |
           VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
           echo "📦 GOST 版本: $VERSION"
@@ -32,13 +31,11 @@ jobs:
           chmod +x gost
           nohup ./gost -L http://:8080 -F "$GOST_PROXY" > gost.log 2>&1 &
           sleep 3
-          echo "✅ GOST 已启动，测试连通性..."
-          curl -s -x http://127.0.0.1:8080 https://api.ipify.org | sed 's/\.[0-9]*$/.**/' && echo
+          echo "✅ GOST 已启动"
 
       - name: 🔧 执行启动脚本
         env:
           MSR_ACCOUNT: ${{ secrets.MSR_ACCOUNT }}
-          GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
         run: bash minestrator_restart.sh
 
@@ -54,7 +51,7 @@ jobs:
             git config user.name "GitHub Actions"
             git add minestrator_restart.sh
             git commit -m "🔄 自动更新 API_KEY_B64"
-            git push "https://${PRIVATE_REPO_TOKEN}@github.com/${{ github.repository_owner }}/Minestrator-Start-Private.git" HEAD
+            git push "https://${PRIVATE_REPO_TOKEN}@github.com/${{ github.repository_owner }}/Minestrator-Restart-Private.git" HEAD
             echo "✅ 已推回私库"
           else
             echo "ℹ️ token 无变化，无需推送"
