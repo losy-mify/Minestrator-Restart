@@ -1,12 +1,14 @@
 name: Minestrator-Restart
 on:
   workflow_dispatch:
+  
 jobs:
   start:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       GOST_PROXY: ${{ secrets.GOST_PROXY }}
+      
     steps:
       - name: 📥 拉取私库脚本
         uses: actions/checkout@v4
@@ -14,10 +16,10 @@ jobs:
           repository: ${{ github.repository_owner }}/Minestrator-Restart-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: private
-
+          
       - name: 📂 复制脚本到工作目录
         run: cp private/minestrator_restart.sh minestrator_restart.sh
-
+        
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
         run: |
@@ -29,8 +31,10 @@ jobs:
           nohup ./gost -L http://:8080 -F "$GOST_PROXY" > gost.log 2>&1 &
           sleep 3
           echo "✅ GOST 已启动，测试连通性..."
-          curl -s -x http://127.0.0.1:8080 https://api.ipify.org | sed 's/\.[0-9]*$/.**/' && echo
-
+          IP_RAW=$(curl -s -x http://127.0.0.1:8080 "https://api.ipify.org?format=json" | grep -o '"ip":"[^"]*"' | cut -d'"' -f4)
+          IP_MASKED=$(echo "$IP_RAW" | sed 's/\([0-9]*\.[0-9]*\.\).*/\1**.**/')
+          echo "$IP_MASKED"
+          
       - name: 🔧 执行重启脚本
         env:
           TG_BOT: ${{ secrets.TG_BOT }}
