@@ -1,7 +1,6 @@
 name: Minestrator-Restart
 on:
   workflow_dispatch:
-
 jobs:
   start:
     runs-on: ubuntu-latest
@@ -35,4 +34,5 @@ jobs:
       - name: 🔧 执行重启脚本
         env:
           TG_BOT: ${{ secrets.TG_BOT }}
+          MINESTRATOR_APIKEY: ${{ secrets.MINESTRATOR_APIKEY }}
         run: bash minestrator_restart.sh
